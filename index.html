@@ -223,6 +223,11 @@ const teams = [
 /* BUILD DROPDOWNS */
 
 function populate(){
+
+/* 👇 ADD THESE LINES */
+teamA.innerHTML = '<option value="">Select Team A</option>';
+teamB.innerHTML = '<option value="">Select Team B</option>';
+
 teams.forEach((team,i)=>{
 let option=document.createElement("option");
 option.value=i;
@@ -231,7 +236,9 @@ option.text=`${team.name} (#${team.seed} ${team.region})`;
 teamA.appendChild(option);
 teamB.appendChild(option.cloneNode(true));
 });
+
 }
+
 
 /* RENDER */
 
