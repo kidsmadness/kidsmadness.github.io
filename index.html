@@ -25,24 +25,32 @@ padding:18px;
 font-size:26px;
 }
 
-.controls{
-margin:20px;
-}
-
+/* NEW LAYOUT */
 .container{
 display:flex;
 flex-wrap:wrap;
 justify-content:center;
-gap:30px;
+gap:40px;
 padding:20px;
 }
 
+.column{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+}
+
+/* CARDS */
 .card{
 width:320px;
 border-radius:18px;
 padding:20px;
 color:white;
 box-shadow:0 10px 20px rgba(0,0,0,.2);
+transition:.2s;
+position:relative;
+overflow:visible;
 }
 
 .placeholder{
@@ -75,13 +83,32 @@ background:#111;
 color:white;
 }
 
+/* WINNER */
 .winner{
 outline:8px solid gold;
+transform:scale(1.05);
+}
+
+/* ✨ SPARKLES */
+.sparkle{
+position:absolute;
+width:10px;
+height:10px;
+border-radius:50%;
+opacity:0.9;
+pointer-events:none;
+animation:sparkleMove 800ms ease-out forwards;
+}
+
+@keyframes sparkleMove{
+to{
+transform:translate(var(--x), var(--y)) scale(0.3);
+opacity:0;
+}
 }
 
 .choices{
 width:260px;
-margin:6px auto;
 }
 
 </style>
@@ -91,29 +118,29 @@ margin:6px auto;
 
 <header>🏀 Kids Madness 🏀</header>
 
-<div class="controls">
+<div class="container">
 
+<!-- TEAM A -->
+<div class="column">
 <select id="teamA"></select>
-<select id="teamB"></select>
+<div id="cardA"></div>
+</div>
 
-<br>
+<!-- TEAM B -->
+<div class="column">
+<select id="teamB"></select>
+<div id="cardB"></div>
+</div>
+
+</div>
 
 <button onclick="resetMatch()">Reset</button>
 
-</div>
-
-<div class="container">
-
-<div id="cardA"></div>
-<div id="cardB"></div>
-
-</div>
-
 <script>
 
-/* TEAM DATA (ALL 68) */
+/* TEAM DATA (KEEP YOUR FULL LIST) */
+const teams = [
 
-const teams=[
 /* EAST - 16 teams */
 {name:"Duke",seed:1,region:"East",record:"28-5",mascot:"Blue Devils",color:"#003087",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5093_l4cffn.jpg"},
 {name:"UConn",seed:2,region:"East",record:"27-7",mascot:"Huskies",color:"#000E2F",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5094_bp2xtf.jpg"},
@@ -189,30 +216,25 @@ const teams=[
 {name:"Tennessee State",seed:15,region:"Midwest",record:"13-19",mascot:"Tigers",color:"#003DA5",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773701001/IMG_5166_nlyagz.jpg"},
 {name:"Howard",seed:16,region:"Midwest",record:"12-20",mascot:"Bison",color:"#00274C",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773701006/IMG_5167_qvjbgs.jpg"},        
 {name:"UMBC",seed:16,region:"Midwest",record:"11-21",mascot:"Retrievers",color:"#FFCC00",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773701015/IMG_5168_rhcopt.jpg"}
-];
 
+];
 
 /* BUILD DROPDOWNS */
 
 function populate(){
-
 teams.forEach((team,i)=>{
-
 let option=document.createElement("option");
 option.value=i;
 option.text=`${team.name} (#${team.seed} ${team.region})`;
 
 teamA.appendChild(option);
 teamB.appendChild(option.cloneNode(true));
-
 });
-
 }
 
-/* RENDER CARDS */
+/* RENDER */
 
 function render(){
-
 let a=teams[teamA.value];
 let b=teams[teamB.value];
 
@@ -220,11 +242,9 @@ if(!a || !b) return;
 
 cardA.innerHTML=createCard(a,"A");
 cardB.innerHTML=createCard(b,"B");
-
 }
 
 function createCard(team,id){
-
 return `
 <div class="card" style="background:${team.color}" id="${id}">
 <img class="teamImage" src="${team.logo}">
@@ -236,39 +256,71 @@ return `
 <button onclick="pick('${id}')">Pick ${team.name}</button>
 </div>
 `;
+}
+
+/* ✨ SPARKLES FROM CARD */
+
+function sparkleBurst(card){
+
+const colors = ["#FFD700","#FFF","#FF6B6B","#4ECDC4"];
+
+for(let i=0;i<25;i++){
+
+let s=document.createElement("div");
+s.className="sparkle";
+
+let angle=Math.random()*2*Math.PI;
+let distance=Math.random()*80+20;
+
+let x=Math.cos(angle)*distance+"px";
+let y=Math.sin(angle)*distance+"px";
+
+s.style.setProperty('--x', x);
+s.style.setProperty('--y', y);
+s.style.background=colors[Math.floor(Math.random()*colors.length)];
+
+s.style.left="50%";
+s.style.top="50%";
+
+card.appendChild(s);
+
+setTimeout(()=>s.remove(),800);
 
 }
 
-/* PICK WINNER */
+}
+
+/* PICK */
 
 function pick(id){
 
 document.querySelectorAll(".card").forEach(c=>c.classList.remove("winner"));
-document.getElementById(id).classList.add("winner");
+
+let selected=document.getElementById(id);
+selected.classList.add("winner");
+
+/* ✨ sparkle magic */
+sparkleBurst(selected);
 
 }
 
 /* RESET */
 
 function resetMatch(){
-
 teamA.value="";
 teamB.value="";
 
 cardA.innerHTML=placeholder("Team A");
 cardB.innerHTML=placeholder("Team B");
-
 }
 
 function placeholder(label){
-
 return `
 <div class="card placeholder">
 <h2>${label}</h2>
 <p>Select a team above</p>
 </div>
 `;
-
 }
 
 /* INIT */
