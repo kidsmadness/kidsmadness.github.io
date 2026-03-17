@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>March Madness Matchup Tool</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<style>
+
+body{
+font-family:-apple-system,BlinkMacSystemFont;
+margin:0;
+background:#f5f5f5;
+text-align:center;
+}
+
+header{
+background:#111;
+color:white;
+padding:18px;
+font-size:26px;
+}
+
+.controls{
+margin:20px;
+}
+
+.container{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:30px;
+padding:20px;
+}
+
+.card{
+width:320px;
+border-radius:18px;
+padding:20px;
+color:white;
+box-shadow:0 10px 20px rgba(0,0,0,.2);
+}
+
+.placeholder{
+background:#ddd;
+color:#333;
+}
+
+.teamImage{
+width:150px;
+height:150px;
+object-fit:contain;
+background:white;
+border-radius:10px;
+padding:10px;
+}
+
+.stat{
+margin:6px 0;
+font-size:17px;
+}
+
+button{
+font-size:18px;
+padding:10px 18px;
+border-radius:10px;
+border:none;
+margin-top:10px;
+cursor:pointer;
+background:#111;
+color:white;
+}
+
+.winner{
+outline:8px solid gold;
+}
+
+.choices{
+width:260px;
+margin:6px auto;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>🏀 March Madness Matchup Tool</header>
+
+<div class="controls">
+
+<select id="teamA"></select>
+<select id="teamB"></select>
+
+<br>
+
+<button onclick="resetMatch()">Reset</button>
+
+</div>
+
+<div class="container">
+
+<div id="cardA"></div>
+<div id="cardB"></div>
+
+</div>
+
+<script>
+
+/* TEAM DATA (ALL 68) */
+
+const teams=[
+/* EAST - 16 teams */
+{name:"Duke",seed:1,region:"East",record:"28-5",mascot:"Blue Devils",color:"#003087",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5093_l4cffn.jpg"},
+{name:"UConn",seed:2,region:"East",record:"27-7",mascot:"Huskies",color:"#000E2F",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5094_bp2xtf.jpg"},
+{name:"Michigan State",seed:3,region:"East",record:"26-8",mascot:"Spartans",color:"#18453B",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5095_gwpzw9.jpg"},
+{name:"Kansas",seed:4,region:"East",record:"24-9",mascot:"Jayhawks",color:"#0051BA",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5096_virnlo.jpg"},
+{name:"St. John's",seed:5,region:"East",record:"23-9",mascot:"Red Storm",color:"#BA0C2F",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5097_mpqlob.jpg"},
+{name:"Louisville",seed:6,region:"East",record:"22-10",mascot:"Cardinals",color:"#AD0000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5098_vtrp7l.jpg"},
+{name:"UCLA",seed:7,region:"East",record:"22-10",mascot:"Bruins",color:"#2D68C4",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5099_jvuh4h.jpg"},
+{name:"Ohio State",seed:8,region:"East",record:"21-11",mascot:"Buckeyes",color:"#BB0000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5100_x6ykpi.jpg"},
+{name:"TCU",seed:9,region:"East",record:"20-12",mascot:"Horned Frogs",color:"#4D1979",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5101_l81lnf.jpg"},
+{name:"UCF",seed:10,region:"East",record:"20-12",mascot:"Knights",color:"#BA9B37",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5102_xupllk.jpg"},
+{name:"South Florida",seed:11,region:"East",record:"19-13",mascot:"Bulls",color:"#006747",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5103_twhgl5.jpg"},
+{name:"Northern Iowa",seed:12,region:"East",record:"19-14",mascot:"Panthers",color:"#592C88",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5104_cqsmkc.jpg"},
+{name:"Cal Baptist",seed:13,region:"East",record:"18-14",mascot:"Lancers",color:"#002F6C",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5105_laq7ft.jpg"},
+{name:"North Dakota State",seed:14,region:"East",record:"18-15",mascot:"Bison",color:"#0A5640",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5106_ktom75.jpg"},
+{name:"Furman",seed:15,region:"East",record:"17-16",mascot:"Paladins",color:"#582C83",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5107_iyayrg.jpg"},
+{name:"Siena",seed:16,region:"East",record:"16-17",mascot:"Saints",color:"#FDB913",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5108_mmycpi.jpg"},
+
+/* SOUTH - 17 teams */
+{name:"Florida",seed:1,region:"South",record:"30-4",mascot:"Gators",color:"#0021A5",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5109_hv8mat.jpg"},
+{name:"Houston",seed:2,region:"South",record:"29-5",mascot:"Cougars",color:"#C8102E",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5110_id2ldp.jpg"},
+{name:"Illinois",seed:3,region:"South",record:"27-8",mascot:"Fighting Illini",color:"#E84A27",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5111_ptm8h6.jpg"},
+{name:"Nebraska",seed:4,region:"South",record:"25-10",mascot:"Cornhuskers",color:"#E41C38",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5112_lntkn9.jpg"},
+{name:"Vanderbilt",seed:5,region:"South",record:"24-9",mascot:"Commodores",color:"#866D4B",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5113_ae5r4s.jpg"},
+{name:"North Carolina",seed:6,region:"South",record:"23-11",mascot:"Tar Heels",color:"#7BAFD4",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5114_wfkeaa.jpg"},
+{name:"Saint Mary's",seed:7,region:"South",record:"22-10",mascot:"Gaels",color:"#A6192E",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5115_hrl98i.jpg"},
+{name:"Clemson",seed:8,region:"South",record:"21-12",mascot:"Tigers",color:"#F56600",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5116_yyumb7.jpg"},
+{name:"Iowa",seed:9,region:"South",record:"20-12",mascot:"Hawkeyes",color:"#FFCD00",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5117_o3kw7u.jpg"},
+{name:"Texas A&M",seed:10,region:"South",record:"19-13",mascot:"Aggies",color:"#500000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5121_hp9juz.jpg"},
+{name:"VCU",seed:11,region:"South",record:"18-14",mascot:"Rams",color:"#000000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/IMG_5122_qqb5xg.jpg"},
+{name:"McNeese",seed:12,region:"South",record:"18-14",mascot:"Cowboys",color:"#00539B",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700708/IMG_5123_xfiqgg.jpg"},
+{name:"Troy",seed:13,region:"South",record:"17-15",mascot:"Trojans",color:"#8A2432",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700716/IMG_5124_rlgy5p.jpg"},
+{name:"Penn",seed:14,region:"South",record:"16-15",mascot:"Quakers",color:"#011F5B",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700726/IMG_5125_pok9bn.jpg"},
+{name:"Idaho",seed:15,region:"South",record:"15-16",mascot:"Vandals",color:"#B3995D",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700735/IMG_5126_qwfooe.jpg"},
+{name:"Lehigh",seed:16,region:"South",record:"16-17",mascot:"Mountain Hawks",color:"#653600",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700744/IMG_5127_xmaw7o.jpg"},        
+{name:"Prairie View A&M",seed:16,region:"South",record:"15-17",mascot:"Panthers",color:"#FF6600",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700753/IMG_5128_zptrul.jpg"},
+
+/* WEST - 17 teams */
+{name:"Arizona",seed:1,region:"West",record:"31-3",mascot:"Wildcats",color:"#CC0033",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700760/IMG_5129_f0ruhf.jpg"},
+{name:"Purdue",seed:2,region:"West",record:"28-6",mascot:"Boilermakers",color:"#CEB888",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700770/IMG_5130_esrud6.jpg"},
+{name:"Gonzaga",seed:3,region:"West",record:"27-7",mascot:"Bulldogs",color:"#041E42",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700797/IMG_5131_vmisnz.jpg"},
+{name:"Arkansas",seed:4,region:"West",record:"25-9",mascot:"Razorbacks",color:"#9D2235",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700805/IMG_5132_xrist4.jpg"},
+{name:"Wisconsin",seed:5,region:"West",record:"24-10",mascot:"Badgers",color:"#C5050C",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700814/IMG_5133_wwnqsj.jpg"},
+{name:"BYU",seed:6,region:"West",record:"23-10",mascot:"Cougars",color:"#002E5D",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700821/IMG_5135_j0cesw.jpg"},
+{name:"Miami (FL)",seed:7,region:"West",record:"22-11",mascot:"Hurricanes",color:"#F47321",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700830/IMG_5136_psjeyl.jpg"},
+{name:"Villanova",seed:8,region:"West",record:"21-12",mascot:"Wildcats",color:"#00205B",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700838/IMG_5137_sztikb.jpg"},
+{name:"Utah State",seed:9,region:"West",record:"20-12",mascot:"Aggies",color:"#00263A",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700847/IMG_5138_pwqgfy.jpg"},
+{name:"Missouri",seed:10,region:"West",record:"19-13",mascot:"Tigers",color:"#000000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700854/IMG_5139_x2nvh4.jpg"},
+{name:"NC State",seed:11,region:"West",record:"18-14",mascot:"Wolfpack",color:"#CC0000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700862/IMG_5141_lkpwea.jpg"},       
+{name:"Texas",seed:11,region:"West",record:"17-15",mascot:"Longhorns",color:"#BF5700",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700869/IMG_5142_zjgcqs.jpg"},         
+{name:"High Point",seed:12,region:"West",record:"16-15",mascot:"Panthers",color:"#5E2A84",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700877/IMG_5143_nuggdv.jpg"},
+{name:"Hawaii",seed:13,region:"West",record:"15-16",mascot:"Rainbow Warriors",color:"#024731",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700883/IMG_5144_zyv2pi.jpg"},
+{name:"Kennesaw State",seed:14,region:"West",record:"14-17",mascot:"Owls",color:"#FDBA12",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700890/IMG_5145_z5iafx.jpg"},
+{name:"Queens (NC)",seed:15,region:"West",record:"13-18",mascot:"Royals",color:"#003A8F",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700898/IMG_5146_kdlwcx.jpg"},
+{name:"Long Island",seed:16,region:"West",record:"12-19",mascot:"Sharks",color:"#000000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700905/IMG_5148_ybpqef.jpg"},
+
+/* MIDWEST - 18 teams */
+{name:"Michigan",seed:1,region:"Midwest",record:"30-5",mascot:"Wolverines",color:"#00274C",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700911/IMG_5151_d36ft2.jpg"},
+{name:"Iowa State",seed:2,region:"Midwest",record:"28-6",mascot:"Cyclones",color:"#C8102E",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700917/IMG_5152_qj0mkc.jpg"},
+{name:"Virginia",seed:3,region:"Midwest",record:"27-8",mascot:"Cavaliers",color:"#232D4B",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700923/IMG_5153_f7cdjp.jpg"},
+{name:"Alabama",seed:4,region:"Midwest",record:"25-10",mascot:"Crimson Tide",color:"#9E1B32",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700929/IMG_5154_cg1hdv.jpg"},
+{name:"Texas Tech",seed:5,region:"Midwest",record:"24-11",mascot:"Red Raiders",color:"#CC0000",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700934/IMG_5155_r3b5yd.jpg"},
+{name:"Tennessee",seed:6,region:"Midwest",record:"23-11",mascot:"Volunteers",color:"#FF8200",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700943/IMG_5156_vhvxk3.jpg"},
+{name:"Kentucky",seed:7,region:"Midwest",record:"22-12",mascot:"Wildcats",color:"#0033A0",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700949/IMG_5157_n5bles.jpg"},
+{name:"Georgia",seed:8,region:"Midwest",record:"21-12",mascot:"Bulldogs",color:"#BA0C2F",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700954/IMG_5158_gkques.jpg"},
+{name:"Saint Louis",seed:9,region:"Midwest",record:"20-13",mascot:"Billikens",color:"#003DA5",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700960/IMG_5159_rmld5o.jpg"},
+{name:"Santa Clara",seed:10,region:"Midwest",record:"19-14",mascot:"Broncos",color:"#862633",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700967/IMG_5160_empcb6.jpg"},
+{name:"SMU",seed:11,region:"Midwest",record:"18-15",mascot:"Mustangs",color:"#C60C30",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700973/IMG_5161_mjvnk4.jpg"},         
+{name:"Miami (Ohio)",seed:11,region:"Midwest",record:"17-15",mascot:"RedHawks",color:"#CF4125",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700978/IMG_5162_fhkjw7.jpg"},
+{name:"Akron",seed:12,region:"Midwest",record:"16-16",mascot:"Zips",color:"#041E42",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700985/IMG_5163_eosqyu.jpg"},
+{name:"Hofstra",seed:13,region:"Midwest",record:"15-17",mascot:"Pride",color:"#003DA5",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700991/IMG_5164_crb7hu.jpg"},
+{name:"Wright State",seed:14,region:"Midwest",record:"14-18",mascot:"Raiders",color:"#026937",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773700996/IMG_5165_cou5nu.jpg"},
+{name:"Tennessee State",seed:15,region:"Midwest",record:"13-19",mascot:"Tigers",color:"#003DA5",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773701001/IMG_5166_nlyagz.jpg"},
+{name:"Howard",seed:16,region:"Midwest",record:"12-20",mascot:"Bison",color:"#00274C",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773701006/IMG_5167_qvjbgs.jpg"},        
+{name:"UMBC",seed:16,region:"Midwest",record:"11-21",mascot:"Retrievers",color:"#FFCC00",logo:"https://res.cloudinary.com/dcvrercvz/image/upload/v1773701015/IMG_5168_rhcopt.jpg"}
+];
+
+
+/* BUILD DROPDOWNS */
+
+function populate(){
+
+teams.forEach((team,i)=>{
+
+let option=document.createElement("option");
+option.value=i;
+option.text=`${team.name} (#${team.seed} ${team.region})`;
+
+teamA.appendChild(option);
+teamB.appendChild(option.cloneNode(true));
+
+});
+
+}
+
+/* RENDER CARDS */
+
+function render(){
+
+let a=teams[teamA.value];
+let b=teams[teamB.value];
+
+if(!a || !b) return;
+
+cardA.innerHTML=createCard(a,"A");
+cardB.innerHTML=createCard(b,"B");
+
+}
+
+function createCard(team,id){
+
+return `
+<div class="card" style="background:${team.color}" id="${id}">
+<img class="teamImage" src="${team.logo}">
+<h2>${team.name}</h2>
+<div class="stat">Seed: #${team.seed}</div>
+<div class="stat">Region: ${team.region}</div>
+<div class="stat">Mascot: ${team.mascot}</div>
+<div class="stat">Record: ${team.record}</div>
+<button onclick="pick('${id}')">Pick ${team.name}</button>
+</div>
+`;
+
+}
+
+/* PICK WINNER */
+
+function pick(id){
+
+document.querySelectorAll(".card").forEach(c=>c.classList.remove("winner"));
+document.getElementById(id).classList.add("winner");
+
+}
+
+/* RESET */
+
+function resetMatch(){
+
+teamA.value="";
+teamB.value="";
+
+cardA.innerHTML=placeholder("Team A");
+cardB.innerHTML=placeholder("Team B");
+
+}
+
+function placeholder(label){
+
+return `
+<div class="card placeholder">
+<h2>${label}</h2>
+<p>Select a team above</p>
+</div>
+`;
+
+}
+
+/* INIT */
+
+populate();
+
+new Choices('#teamA',{searchEnabled:true,shouldSort:false,itemSelectText:''});
+new Choices('#teamB',{searchEnabled:true,shouldSort:false,itemSelectText:''});
+
+teamA.addEventListener("change",render);
+teamB.addEventListener("change",render);
+
+resetMatch();
+
+</script>
+
+</body>
+</html>
