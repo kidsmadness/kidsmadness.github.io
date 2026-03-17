@@ -236,13 +236,24 @@ teamB.appendChild(option.cloneNode(true));
 /* RENDER */
 
 function render(){
+
 let a=teams[teamA.value];
 let b=teams[teamB.value];
 
-if(!a || !b) return;
-
+/* TEAM A */
+if(a){
 cardA.innerHTML=createCard(a,"A");
+}else{
+cardA.innerHTML=placeholder("Team A");
+}
+
+/* TEAM B */
+if(b){
 cardB.innerHTML=createCard(b,"B");
+}else{
+cardB.innerHTML=placeholder("Team B");
+}
+
 }
 
 function createCard(team,id){
